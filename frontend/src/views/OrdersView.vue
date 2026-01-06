@@ -4,7 +4,8 @@
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-          <div class="flex items-center">
+          <div class="flex items-center space-x-3">
+            <img :src="logo" alt="Simple Orders logo" class="h-8 w-auto" />
             <h1 class="text-xl font-bold text-gray-900">Simple Orders</h1>
           </div>
           <div class="flex items-center space-x-4">
@@ -34,20 +35,24 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-start mb-6">
           <h2 class="text-2xl font-bold text-gray-900">My Orders</h2>
-          <select
-            v-model="statusFilter"
-            @change="loadOrders"
-            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <VForm @submit.prevent>
+            <Field name="status" v-model="statusFilter" v-slot="{ field }">
+              <select
+                v-bind="field"
+                @change="loadOrders"
+                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </Field>
+          </VForm>
         </div>
 
         <div v-if="loading" class="text-center py-12">
@@ -101,10 +106,10 @@
                 >
                   <div class="flex-1">
                     <h4 class="font-medium text-gray-900">{{ item.product?.name || 'Product' }}</h4>
-                    <p class="text-sm text-gray-500">Quantity: {{ item.quantity }} × ${{ item.price }}</p>
+                    <p class="text-sm text-gray-500">Quantity: {{ item.quantity }} × {{ formatRupiah(item.price) }}</p>
                   </div>
                   <div class="text-right">
-                    <p class="font-semibold text-gray-900">${{ (item.price * item.quantity).toFixed(2) }}</p>
+                    <p class="font-semibold text-gray-900">{{ formatRupiah(item.price * item.quantity) }}</p>
                   </div>
                 </div>
               </div>
@@ -124,7 +129,7 @@
                   </div>
                   <div class="text-right">
                     <p class="text-sm text-gray-500">Total Amount</p>
-                    <p class="text-2xl font-bold text-gray-900">${{ order.totalAmount.toFixed(2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ formatRupiah(order.totalAmount) }}</p>
                   </div>
                 </div>
               </div>
@@ -157,6 +162,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { orderService } from '../services/order';
 import { authService } from '../services/auth';
+import { formatRupiah } from '../utils/currency';
+import logo from '../assets/logo.png';
+import { Form as VForm, Field } from 'vee-validate';
 
 const router = useRouter();
 const orders = ref([]);

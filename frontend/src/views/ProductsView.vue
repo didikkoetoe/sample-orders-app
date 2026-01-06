@@ -4,7 +4,8 @@
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-          <div class="flex items-center">
+          <div class="flex items-center space-x-3">
+            <img :src="logo" alt="Simple Orders logo" class="h-8 w-auto" />
             <h1 class="text-xl font-bold text-gray-900">Simple Orders</h1>
           </div>
           <div class="flex items-center space-x-4">
@@ -34,27 +35,35 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-start mb-6">
           <h2 class="text-2xl font-bold text-gray-900">Products</h2>
-          <div class="flex space-x-4">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search products..."
-              class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              @input="handleSearch"
-            />
-            <select
-              v-model="selectedCategory"
-              @change="handleFilter"
-              class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Accessories">Accessories</option>
-              <option value="Storage">Storage</option>
-            </select>
-          </div>
+          <VForm class="flex space-x-4" @submit.prevent>
+            <Field name="search" v-model="searchQuery" rules="max:100" v-slot="{ field, errorMessage }">
+              <div class="flex flex-col">
+                <input
+                  v-bind="field"
+                  type="text"
+                  placeholder="Search products..."
+                  class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  :class="errorMessage ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'"
+                  @input="handleSearch"
+                />
+                <p v-if="errorMessage" class="text-sm text-red-600 mt-1">{{ errorMessage }}</p>
+              </div>
+            </Field>
+            <Field name="category" v-model="selectedCategory" v-slot="{ field }">
+              <select
+                v-bind="field"
+                @change="handleFilter"
+                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Storage">Storage</option>
+              </select>
+            </Field>
+          </VForm>
         </div>
 
         <div v-if="loading" class="text-center py-12">
@@ -80,7 +89,7 @@
               <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ product.name }}</h3>
               <p class="text-gray-600 text-sm mb-3">{{ product.description }}</p>
               <div class="flex justify-between items-center mb-3">
-                <span class="text-2xl font-bold text-indigo-600">${{ product.price }}</span>
+                <span class="text-2xl font-bold text-indigo-600">{{ formatRupiah(product.price) }}</span>
                 <span class="text-sm text-gray-500">Stock: {{ product.stock }}</span>
               </div>
               <button
@@ -114,7 +123,7 @@
           <div class="border-t pt-4">
             <div class="flex justify-between mb-4">
               <span class="font-semibold">Total:</span>
-              <span class="font-bold text-xl">${{ cartTotal.toFixed(2) }}</span>
+              <span class="font-bold text-xl">{{ formatRupiah(cartTotal) }}</span>
             </div>
             <button
               @click="proceedToCheckout"
@@ -134,6 +143,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { productService } from '../services/product';
 import { authService } from '../services/auth';
+import { formatRupiah } from '../utils/currency';
+import logo from '../assets/logo.png';
+import { Form as VForm, Field } from 'vee-validate';
 
 const router = useRouter();
 const products = ref([]);

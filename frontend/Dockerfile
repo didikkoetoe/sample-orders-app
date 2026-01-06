@@ -4,7 +4,7 @@ RUN mkdir -p /usr/src/frontend && chown -R node:node /usr/src/frontend
 
 WORKDIR /usr/src/frontend
 
-COPY package.json package-lock.json* ./
+COPY --chown=node:node package.json package-lock.json* ./
 
 USER node
 

@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    image: simple-orders-backend
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
+      - PORT=3000
+      - JWT_SECRET=thisisasamplesecret
+      - JWT_ACCESS_EXPIRATION_MINUTES=30
+      - JWT_REFRESH_EXPIRATION_DAYS=30
+      - JWT_RESET_PASSWORD_EXPIRATION_MINUTES=10
+      - JWT_VERIFY_EMAIL_EXPIRATION_MINUTES=10
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/usr/src/node-app
+      - /usr/src/node-app/node_modules
+    networks:
+      - app-network
+    command: npm run dev
+
+  frontend:
+    build: ./frontend
+    image: simple-orders-frontend
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    networks:
+      - app-network
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+
+  mongodb:
+    image: mongo:4.2.1-bionic
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata:/data/db
+    networks:
+      - app-network
+
+volumes:
+  dbdata:
+
+networks:
+  app-network:
+    driver: bridge

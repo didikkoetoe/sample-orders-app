@@ -55,19 +55,23 @@ module.exports = router;
  *                       type: string
  *                     quantity:
  *                       type: number
- *               shippingAddress:
- *                 type: object
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *                   state:
- *                     type: string
- *                   zipCode:
- *                     type: string
- *                   country:
- *                     type: string
+*               shippingAddress:
+*                 type: object
+*                 properties:
+                  alamat:
+                    type: string
+                  kelurahan:
+                    type: string
+                  kecamatan:
+                    type: string
+                  kota:
+                    type: string
+                  provinsi:
+                    type: string
+                  kodePos:
+                    type: string
+                  negara:
+                    type: string
  *               paymentMethod:
  *                 type: string
  *                 enum: [credit_card, debit_card, paypal, bank_transfer, cash_on_delivery]
@@ -75,12 +79,14 @@ module.exports = router;
  *               items:
  *                 - product: 5f8f8c44b54764421b7156c3
  *                   quantity: 2
- *               shippingAddress:
- *                 street: 123 Main St
- *                 city: New York
- *                 state: NY
- *                 zipCode: "10001"
- *                 country: USA
+*               shippingAddress:
+                alamat: "Jl. Kebon Jeruk No. 10"
+                kelurahan: Kebon Jeruk
+                kecamatan: Kebon Jeruk
+                kota: Jakarta Barat
+                provinsi: DKI Jakarta
+                kodePos: "11530"
+                negara: Indonesia
  *               paymentMethod: credit_card
  *     responses:
  *       "201":

@@ -38,11 +38,16 @@ const orderSchema = mongoose.Schema(
       default: 'pending',
     },
     shippingAddress: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
+      alamat: String,
+      kelurahan: String,
+      kecamatan: String,
+      kota: String,
+      provinsi: String,
+      kodePos: String,
+      negara: {
+        type: String,
+        default: 'Indonesia',
+      },
     },
     paymentMethod: {
       type: String,

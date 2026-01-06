@@ -118,9 +118,8 @@
                 <div class="flex justify-between items-center">
                   <div>
                     <p class="text-sm text-gray-600">
-                      <span class="font-medium">Shipping to:</span>
-                      {{ order.shippingAddress?.street }}, {{ order.shippingAddress?.city }},
-                      {{ order.shippingAddress?.state }} {{ order.shippingAddress?.zipCode }}
+                      <span class="font-medium">Alamat Pengiriman:</span>
+                      {{ formatShippingAddress(order.shippingAddress) }}
                     </p>
                     <p class="text-sm text-gray-600 mt-1">
                       <span class="font-medium">Payment:</span>
@@ -195,12 +194,9 @@
 
             <div class="grid sm:grid-cols-2 gap-4 mt-4">
               <div>
-                <h4 class="font-semibold text-gray-800 mb-1">Shipping Address</h4>
-                <p class="text-sm text-gray-700">
-                  {{ selectedOrder.shippingAddress?.street }}<br />
-                  {{ selectedOrder.shippingAddress?.city }}, {{ selectedOrder.shippingAddress?.state }}
-                  {{ selectedOrder.shippingAddress?.zipCode }}<br />
-                  {{ selectedOrder.shippingAddress?.country }}
+                <h4 class="font-semibold text-gray-800 mb-1">Alamat Pengiriman</h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line">
+                  {{ formatShippingAddress(selectedOrder.shippingAddress, { lineBreak: '\n' }) }}
                 </p>
               </div>
               <div>
@@ -301,6 +297,21 @@ const formatPaymentMethod = (method) => {
   return methods[method] || method;
 };
 
+const formatShippingAddress = (address, { lineBreak = ', ' } = {}) => {
+  if (!address) return '-';
+  const parts = [
+    address.alamat,
+    address.kelurahan ? `Kel. ${address.kelurahan}` : null,
+    address.kecamatan ? `Kec. ${address.kecamatan}` : null,
+    address.kota,
+    address.provinsi,
+    address.kodePos ? `Kode Pos ${address.kodePos}` : null,
+    address.negara || 'Indonesia',
+  ].filter(Boolean);
+
+  return parts.join(lineBreak);
+};
+
 const getStatusClass = (status) => {
   const classes = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -348,6 +359,8 @@ const printOrder = (order) => {
     )
     .join('');
 
+  const shippingAddressHtml = formatShippingAddress(order.shippingAddress, { lineBreak: '<br />' });
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -379,10 +392,8 @@ const printOrder = (order) => {
         </div>
 
         <div class="summary">
-          <strong>Shipping to:</strong><br />
-          ${order.shippingAddress?.street || ''}<br />
-          ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} ${order.shippingAddress?.zipCode || ''}<br />
-          ${order.shippingAddress?.country || ''}
+          <strong>Alamat Pengiriman:</strong><br />
+          ${shippingAddressHtml}
         </div>
 
         <table>

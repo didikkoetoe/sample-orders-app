@@ -52,7 +52,7 @@
                   </div>
                   <div class="text-right">
                     <p class="font-semibold text-gray-900">{{ formatRupiah(item.price * item.quantity) }}</p>
-                    <p class="text-sm text-gray-500">{{ formatRupiah(item.price) }} each</p>
+                    <p class="text-sm text-gray-500">{{ formatRupiah(item.price) }} per item</p>
                   </div>
                 </div>
               </div>
@@ -65,18 +65,18 @@
             <!-- Shipping Form -->
             <VForm @submit="handleSubmit" class="space-y-6">
               <div>
-                <h3 class="text-lg font-semibold mb-4">Shipping Address</h3>
+                <h3 class="text-lg font-semibold mb-4">Alamat Pengiriman</h3>
                 <div class="grid grid-cols-1 gap-4">
                   <div>
-                    <label for="street" class="block text-sm font-medium text-gray-700">Street Address</label>
+                    <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
                     <Field
-                      name="street"
-                      v-model="form.shippingAddress.street"
+                      name="alamat"
+                      v-model="form.shippingAddress.alamat"
                       rules="required|min:3"
                       v-slot="{ field, errorMessage }"
                     >
                       <input
-                        id="street"
+                        id="alamat"
                         v-bind="field"
                         type="text"
                         class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
@@ -87,15 +87,15 @@
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                      <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
                       <Field
-                        name="city"
-                        v-model="form.shippingAddress.city"
+                        name="kelurahan"
+                        v-model="form.shippingAddress.kelurahan"
                         rules="required|min:2"
                         v-slot="{ field, errorMessage }"
                       >
                         <input
-                          id="city"
+                          id="kelurahan"
                           v-bind="field"
                           type="text"
                           class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
@@ -105,15 +105,15 @@
                       </Field>
                     </div>
                     <div>
-                      <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+                      <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
                       <Field
-                        name="state"
-                        v-model="form.shippingAddress.state"
+                        name="kecamatan"
+                        v-model="form.shippingAddress.kecamatan"
                         rules="required|min:2"
                         v-slot="{ field, errorMessage }"
                       >
                         <input
-                          id="state"
+                          id="kecamatan"
                           v-bind="field"
                           type="text"
                           class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
@@ -125,15 +125,15 @@
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label for="zipCode" class="block text-sm font-medium text-gray-700">Zip Code</label>
+                      <label for="kota" class="block text-sm font-medium text-gray-700">Kota/Kabupaten</label>
                       <Field
-                        name="zipCode"
-                        v-model="form.shippingAddress.zipCode"
-                        rules="required|min:3|max:10"
+                        name="kota"
+                        v-model="form.shippingAddress.kota"
+                        rules="required|min:3"
                         v-slot="{ field, errorMessage }"
                       >
                         <input
-                          id="zipCode"
+                          id="kota"
                           v-bind="field"
                           type="text"
                           class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
@@ -143,15 +143,53 @@
                       </Field>
                     </div>
                     <div>
-                      <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                      <label for="provinsi" class="block text-sm font-medium text-gray-700">Provinsi</label>
                       <Field
-                        name="country"
-                        v-model="form.shippingAddress.country"
+                        name="provinsi"
+                        v-model="form.shippingAddress.provinsi"
                         rules="required|min:2"
                         v-slot="{ field, errorMessage }"
                       >
                         <input
-                          id="country"
+                          id="provinsi"
+                          v-bind="field"
+                          type="text"
+                          class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
+                          :class="errorMessage ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'"
+                        />
+                        <p v-if="errorMessage" class="text-sm text-red-600 mt-1">{{ errorMessage }}</p>
+                      </Field>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label for="kodePos" class="block text-sm font-medium text-gray-700">Kode Pos</label>
+                      <Field
+                        name="kodePos"
+                        v-model="form.shippingAddress.kodePos"
+                        rules="required|min:3|max:10"
+                        v-slot="{ field, errorMessage }"
+                      >
+                        <input
+                          id="kodePos"
+                          v-bind="field"
+                          type="text"
+                          class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
+                          :class="errorMessage ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'"
+                        />
+                        <p v-if="errorMessage" class="text-sm text-red-600 mt-1">{{ errorMessage }}</p>
+                      </Field>
+                    </div>
+                    <div>
+                      <label for="negara" class="block text-sm font-medium text-gray-700">Negara</label>
+                      <Field
+                        name="negara"
+                        v-model="form.shippingAddress.negara"
+                        rules="required|min:2"
+                        v-slot="{ field, errorMessage }"
+                      >
+                        <input
+                          id="negara"
                           v-bind="field"
                           type="text"
                           class="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none sm:text-sm"
@@ -229,11 +267,13 @@ const success = ref(false);
 const form = ref({
   items: [],
   shippingAddress: {
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
+    alamat: '',
+    kelurahan: '',
+    kecamatan: '',
+    kota: '',
+    provinsi: '',
+    kodePos: '',
+    negara: 'Indonesia',
   },
   paymentMethod: '',
 });

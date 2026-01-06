@@ -3,12 +3,12 @@
     <!-- Header -->
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 h-auto sm:h-16">
           <div class="flex items-center space-x-3">
             <img :src="logo" alt="Simple Orders logo" class="h-8 w-auto" />
             <h1 class="text-xl font-bold text-gray-900">Simple Orders</h1>
           </div>
-          <div class="flex items-center space-x-4">
+          <div class="flex flex-wrap items-center gap-3 sm:gap-4">
             <router-link
               to="/products"
               class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -35,11 +35,11 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
-        <div class="flex justify-between items-start mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 class="text-2xl font-bold text-gray-900">Products</h2>
-          <VForm class="flex space-x-4" @submit.prevent>
+          <VForm class="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto" @submit.prevent>
             <Field name="search" v-model="searchQuery" rules="max:100" v-slot="{ field, errorMessage }">
-              <div class="flex flex-col">
+              <div class="flex flex-col sm:w-64">
                 <input
                   v-bind="field"
                   type="text"
@@ -55,7 +55,7 @@
               <select
                 v-bind="field"
                 @change="handleFilter"
-                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-48"
               >
                 <option value="">All Categories</option>
                 <option value="Electronics">Electronics</option>
@@ -104,7 +104,10 @@
         </div>
 
         <!-- Cart Summary -->
-        <div v-if="cart.length > 0" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-sm">
+        <div
+          v-if="cart.length > 0"
+          class="fixed bottom-4 right-4 left-4 sm:left-auto bg-white rounded-lg shadow-lg p-4 max-w-sm sm:max-w-sm"
+        >
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Cart ({{ cart.length }})</h3>
             <button @click="clearCart" class="text-red-600 text-sm hover:text-red-800">Clear</button>

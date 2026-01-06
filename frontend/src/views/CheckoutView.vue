@@ -3,7 +3,7 @@
     <!-- Header -->
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 h-auto sm:h-16">
           <div class="flex items-center space-x-3">
             <img :src="logo" alt="Simple Orders logo" class="h-8 w-auto" />
             <h1 class="text-xl font-bold text-gray-900">Simple Orders - Checkout</h1>
@@ -85,7 +85,7 @@
                       <p v-if="errorMessage" class="text-sm text-red-600 mt-1">{{ errorMessage }}</p>
                     </Field>
                   </div>
-                  <div class="grid grid-cols-2 gap-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
                       <Field
@@ -123,7 +123,7 @@
                       </Field>
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label for="kota" class="block text-sm font-medium text-gray-700">Kota/Kabupaten</label>
                       <Field
@@ -161,7 +161,7 @@
                       </Field>
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label for="kodePos" class="block text-sm font-medium text-gray-700">Kode Pos</label>
                       <Field
@@ -226,7 +226,7 @@
                 </Field>
               </div>
 
-              <div class="flex justify-between">
+              <div class="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
                 <button
                   type="button"
                   @click="goBack"
@@ -239,7 +239,8 @@
                   :disabled="loading"
                   class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
-                  {{ loading ? 'Processing...' : 'Place Order' }}
+                  <span v-if="loading">Processing...</span>
+                  <span v-else>Place Order</span>
                 </button>
               </div>
             </VForm>
@@ -283,6 +284,7 @@ const totalAmount = computed(() => {
 });
 
 const handleSubmit = async () => {
+  if (loading.value) return;
   loading.value = true;
   error.value = '';
 

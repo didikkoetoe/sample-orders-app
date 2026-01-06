@@ -142,6 +142,12 @@
                   View Details
                 </button>
                 <button
+                  @click="printOrder(order)"
+                  class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Print Invoice
+                </button>
+                <button
                   v-if="order.status === 'pending'"
                   @click="cancelOrder(order.id)"
                   class="px-4 py-2 text-sm text-red-600 hover:text-red-800 font-medium"
@@ -155,10 +161,87 @@
       </div>
     </div>
   </div>
+
+  <!-- Order Detail Modal -->
+  <div v-if="showDetail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full overflow-hidden">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <div>
+          <h3 class="text-xl font-semibold">Order Details</h3>
+          <p class="text-sm text-gray-500">Order #{{ detailOrderId }}</p>
+        </div>
+        <button @click="closeDetail" class="text-gray-500 hover:text-gray-700">✕</button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div v-if="detailLoading" class="text-center text-gray-600">Loading order...</div>
+        <div v-else>
+          <div v-if="detailError" class="rounded-md bg-red-50 p-4">
+            <p class="text-sm text-red-800">{{ detailError }}</p>
+          </div>
+          <div v-else-if="selectedOrder">
+            <div class="flex flex-wrap gap-4 items-center">
+              <span :class="getStatusClass(selectedOrder.status)" class="px-3 py-1 rounded-full text-sm font-medium">
+                {{ selectedOrder.status?.toUpperCase() }}
+              </span>
+              <span v-if="selectedOrder.isPaid" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                PAID
+              </span>
+              <span v-else class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                UNPAID
+              </span>
+              <span class="text-sm text-gray-600">Date: {{ formatDate(selectedOrder.createdAt) }}</span>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <h4 class="font-semibold text-gray-800 mb-1">Shipping Address</h4>
+                <p class="text-sm text-gray-700">
+                  {{ selectedOrder.shippingAddress?.street }}<br />
+                  {{ selectedOrder.shippingAddress?.city }}, {{ selectedOrder.shippingAddress?.state }}
+                  {{ selectedOrder.shippingAddress?.zipCode }}<br />
+                  {{ selectedOrder.shippingAddress?.country }}
+                </p>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800 mb-1">Payment</h4>
+                <p class="text-sm text-gray-700">{{ formatPaymentMethod(selectedOrder.paymentMethod) }}</p>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h4 class="font-semibold text-gray-800 mb-2">Items</h4>
+              <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 text-sm">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-3 py-2 text-left border-b">Item</th>
+                      <th class="px-3 py-2 text-center border-b">Qty</th>
+                      <th class="px-3 py-2 text-right border-b">Price</th>
+                      <th class="px-3 py-2 text-right border-b">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in selectedOrder.items" :key="item.id" class="border-b last:border-b-0">
+                      <td class="px-3 py-2">{{ item.product?.name || 'Product' }}</td>
+                      <td class="px-3 py-2 text-center">{{ item.quantity }}</td>
+                      <td class="px-3 py-2 text-right">{{ formatRupiah(item.price) }}</td>
+                      <td class="px-3 py-2 text-right">{{ formatRupiah(item.price * item.quantity) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-right font-bold text-lg mt-3">Total: {{ formatRupiah(selectedOrder.totalAmount) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { orderService } from '../services/order';
 import { authService } from '../services/auth';
@@ -171,6 +254,10 @@ const orders = ref([]);
 const loading = ref(false);
 const error = ref('');
 const statusFilter = ref('');
+const showDetail = ref(false);
+const detailLoading = ref(false);
+const selectedOrder = ref(null);
+const detailError = ref('');
 
 const loadOrders = async () => {
   loading.value = true;
@@ -190,14 +277,17 @@ const loadOrders = async () => {
 };
 
 const formatDate = (dateString) => {
+  if (!dateString) return '-';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return new Intl.DateTimeFormat('id-ID', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  }).format(date);
 };
 
 const formatPaymentMethod = (method) => {
@@ -222,9 +312,108 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800';
 };
 
-const viewOrderDetails = (order) => {
-  // Can expand to show a modal with more details
-  console.log('View order:', order);
+const viewOrderDetails = async (order) => {
+  detailLoading.value = true;
+  detailError.value = '';
+  showDetail.value = true;
+  selectedOrder.value = null;
+
+  try {
+    const data = await orderService.getOrder(order.id);
+    selectedOrder.value = data;
+  } catch (err) {
+    detailError.value = 'Failed to load order details. Please try again.';
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+const closeDetail = () => {
+  showDetail.value = false;
+  selectedOrder.value = null;
+  detailError.value = '';
+};
+
+const printOrder = (order) => {
+  const itemsRows = (order.items || [])
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:8px;border:1px solid #e5e7eb;">${item.product?.name || 'Product'}</td>
+          <td style="padding:8px;border:1px solid #e5e7eb;text-align:center;">${item.quantity}</td>
+          <td style="padding:8px;border:1px solid #e5e7eb;text-align:right;">${formatRupiah(item.price)}</td>
+          <td style="padding:8px;border:1px solid #e5e7eb;text-align:right;">${formatRupiah(item.price * item.quantity)}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Invoice #${order.id || ''}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+          h1 { margin-bottom: 4px; }
+          .muted { color: #6b7280; font-size: 12px; }
+          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+          .summary { margin-top: 16px; }
+          table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+          .totals { text-align: right; margin-top: 12px; font-size: 16px; font-weight: 700; }
+          .badge { display: inline-block; padding: 4px 8px; border-radius: 9999px; font-size: 12px; background: #e5e7eb; color: #111827; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1>Invoice</h1>
+            <div class="muted">Order #${order.id || ''}</div>
+            <div class="muted">Date: ${formatDate(order.createdAt)}</div>
+          </div>
+          <div>
+            <span class="badge">${order.status?.toUpperCase() || 'PENDING'}</span>
+            ${order.isPaid ? '<span class="badge" style="background:#d1fae5;color:#065f46;margin-left:8px;">PAID</span>' : ''}
+          </div>
+        </div>
+
+        <div class="summary">
+          <strong>Shipping to:</strong><br />
+          ${order.shippingAddress?.street || ''}<br />
+          ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} ${order.shippingAddress?.zipCode || ''}<br />
+          ${order.shippingAddress?.country || ''}
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Item</th>
+              <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">Qty</th>
+              <th style="padding:8px;border:1px solid #e5e7eb;text-align:right;">Price</th>
+              <th style="padding:8px;border:1px solid #e5e7eb;text-align:right;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsRows}
+          </tbody>
+        </table>
+
+        <div class="totals">Total: ${formatRupiah(order.totalAmount)}</div>
+      </body>
+    </html>
+  `;
+
+  const printWindow = window.open('', '_blank', 'width=900,height=650');
+  if (!printWindow) return;
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+  printWindow.document.close();
 };
 
 const cancelOrder = async (orderId) => {
@@ -242,6 +431,8 @@ const handleLogout = () => {
   authService.logout();
   router.push('/login');
 };
+
+const detailOrderId = computed(() => selectedOrder.value?.id || selectedOrder.value?._id || '');
 
 onMounted(() => {
   loadOrders();

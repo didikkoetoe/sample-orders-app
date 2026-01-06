@@ -61,6 +61,7 @@ const orderSchema = mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { keepTimestamps: true },
   }
 );
 

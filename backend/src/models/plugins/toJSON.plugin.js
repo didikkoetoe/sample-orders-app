@@ -31,8 +31,12 @@ const toJSON = (schema) => {
       ret.id = ret._id.toString();
       delete ret._id;
       delete ret.__v;
-      delete ret.createdAt;
-      delete ret.updatedAt;
+
+      const keepTimestamps = schema.options.toJSON && schema.options.toJSON.keepTimestamps;
+      if (!keepTimestamps) {
+        delete ret.createdAt;
+        delete ret.updatedAt;
+      }
       if (transform) {
         return transform(doc, ret, options);
       }

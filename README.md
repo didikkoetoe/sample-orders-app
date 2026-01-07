@@ -51,3 +51,14 @@ Common Commands
 Notes
 -----
 - Frontend runs Vite in dev mode inside the container with hot reload.
+
+Microservice Structure (Frontend & Backend Separated)
+-----------------------------------------------------
+If you split the frontend and backend into separate deployments, treat them as two services that communicate over HTTP:
+- Backend service: exposes the REST API at `/v1/*` (auth, products, orders). It connects to MongoDB and handles all business logic.
+- Frontend service: a static SPA built by Vite, deployed separately (e.g., Nginx, CDN). It calls the backend API via `VITE_API_URL`.
+
+In this mode:
+- Set `VITE_API_URL` to the backend URL (e.g., `https://api.example.com`).
+- Configure CORS on the backend to allow the frontend domain.
+- Deploy MongoDB only with the backend (frontend does not need DB access).

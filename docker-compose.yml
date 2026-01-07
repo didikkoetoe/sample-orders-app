@@ -23,7 +23,6 @@ services:
     command: npm run dev
 
   seed:
-    build: ./backend
     image: simple-orders-backend
     user: root
     environment:
